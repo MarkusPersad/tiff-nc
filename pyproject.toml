@@ -1,0 +1,29 @@
+[project]
+name = "tiff-nc"
+version = "0.3.0"
+description = "A util for converting netcdf datasets and TIFF images to and from each other"
+readme = "README.md"
+authors = [
+    { name = "MarkusPersad", email = "msp060308@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "dask>=2025.2.0",
+    "gdal>=3.10.2",
+    "geopandas>=1.0.1",
+    "h5netcdf>=1.6.1",
+    "pyogrio>=0.10.0",
+    "rioxarray>=0.18.2",
+    "xarray>=2025.1.2",
+]
+
+[project.scripts]
+tiff-nc = "tiff_nc:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
