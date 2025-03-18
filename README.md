@@ -1,6 +1,10 @@
 # TIFF-NC 转换工具
 
 本工具提供了将 NetCDF 文件与多波段 TIFF 文件相互转换的功能，适用于气象、地理等领域的数据处理。
+## 安装
+```bash
+pip install tiff-nc
+```
 
 ## 功能概述
 
