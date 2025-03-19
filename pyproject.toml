@@ -1,6 +1,6 @@
 [project]
 name = "tiff-nc"
-version = "0.3.0"
+version = "0.4.0"
 description = "A util for converting netcdf datasets and TIFF images to and from each other"
 readme = "README.md"
 authors = [
