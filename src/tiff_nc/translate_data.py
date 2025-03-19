@@ -6,8 +6,7 @@ import pandas as pd
 import numpy as np
 import rioxarray as rxr
 from dask.diagnostics.progress import ProgressBar
-from datetime import datetime
-from typing import Optional
+from typing import Optional,Literal
 
 def nc_to_tiffs(
     nc_file:str,
@@ -17,7 +16,7 @@ def nc_to_tiffs(
     time_dim="valid_time",
     shapefile:str|None=None,
     crs:str="EPSG:4326",
-    time_format:str="%Y%m%d",
+    time_format:Literal['%Y%m%d','%Y%m','%Y']="%Y%m%d",
     workers:int=4,
     ) -> None:
     """
@@ -83,7 +82,7 @@ def tiffs_to_nc(
     var_name:str|list[str],
     time_dim:str="valid_time",
     chunks:Optional[dict[str, int]] = None,
-    time_format:str="%Y%m%d",
+    time_format:Literal['%Y%m%d','%Y%m','%Y']="%Y%m%d",
     workers:int=4,
     attrs:dict[str, str]={},
     vars_attrs:dict[str, dict[str, str]]={},
