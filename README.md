@@ -66,6 +66,8 @@ nc_to_tiffs(
 - `chunks` (dict, 可选): 分块大小，默认为 `None`。
 - `time_format` (str, 可选): 时间格式，默认为 `"%Y%m%d"`。
 - `workers` (int, 可选): 工作进程数，默认为 `4`。
+- `attrs` (dict[str, str], 可选): 全局属性，默认为 `{}`。
+- `vars_attrs` (dict[str, dict[str, str]], 可选): 变量属性，默认为 `{}`。例如：`{"variable1": {"units": "m", "long_name": "Height"}, "variable2": {"units": "K", "long_name": "Temperature"}}`。
 
 #### 示例
 ```python
@@ -77,6 +79,11 @@ tiffs_to_nc(
     chunks={"valid_time": -1, "latitude": 512, "longitude": 512},
     time_format="%Y%m%d",
     workers=4,
+    attrs={"title": "Example Dataset", "institution": "Example Institution"},
+    vars_attrs={
+        "variable1": {"units": "m", "long_name": "Height"},
+        "variable2": {"units": "K", "long_name": "Temperature"}
+    }
 )
 ```
 #### 注意

@@ -85,6 +85,8 @@ def tiffs_to_nc(
     chunks:Optional[dict[str, int]] = None,
     time_format:str="%Y%m%d",
     workers:int=4,
+    attrs:dict[str, str]={},
+    vars_attrs:dict[str, dict[str, str]]={},
     ) -> None:
     """
     将多波段tiff文件转为nc文件
@@ -97,6 +99,8 @@ def tiffs_to_nc(
         chunks (Optional[dict[str, int]], optional): 分块大小. Defaults to None.
         time_format (str, optional): 时间格式. Defaults to "%Y%m%d".
         workers (int, optional): 工作进程数. Defaults to 4.
+        attrs (dict[str, str], optional): 全局属性. Defaults to {}.
+        vars_attrs (dict[str, dict[str, str]], optional): 变量属性. Defaults to {}.
 
     Raises:
         ValueError: 文件名称为时间字符串格式与Time_format不匹配。
@@ -131,6 +135,8 @@ def tiffs_to_nc(
         del lds
     ds = xr.concat(xds_sets, dim=time_dim)
     ds = ds.rename({'y':'latitude', 'x':'longitude'})
+    # 添加全局属性
+    ds.attrs.update(attrs)
     encoding = {
         **{
             var: {
@@ -141,7 +147,8 @@ def tiffs_to_nc(
                 "chunksizes":(
                                 chunks[time_dim] if chunks[time_dim] > 0 else 1,
                                 chunks['latitude'] if chunks['latitude'] > 0 else 1,
-                                chunks['longitude'] if chunks['longitude'] > 0 else 1)
+                                chunks['longitude'] if chunks['longitude'] > 0 else 1),
+                **vars_attrs.get(var, {})# 添加变量属性
             }for var in ds.data_vars
         },
         "latitude": {"dtype": "float32"},
