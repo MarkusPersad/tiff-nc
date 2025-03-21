@@ -1,5 +1,5 @@
 import inspect
-from typing import Callable,Mapping,Any
+from typing import Callable,Mapping,Any,Literal
 import xarray as xr
 def get_func_args(func:Callable) -> dict:
     """
@@ -54,5 +54,44 @@ def calculate_by_dimension(
     )
     
     
-    
-        
+def calculate_by_time(
+    func:Callable,
+    ds:xr.Dataset,
+    time_dim:str="valid_time",
+    kwargs:Mapping[str,Any]|None=None,
+    chunks:dict[str,int]|None=None,
+    var_name:str="variable",
+    time_selection:Literal['Y','M','D','S'] = 'year'
+    ):
+    """
+    按时间维度计算数据集的函数,可指定时间粒度
+
+    Args:
+        func (Callable): func(ndarray,**kwargs)
+        ds (xr.Dataset): 包含地理信息数据集
+        time_dim (str, optional):   时间维度名称. Defaults to "valid_time".
+        kwargs (Mapping[str,Any] | None, optional): func的额外参数. Defaults to None.
+        chunks (dict[str,int] | None, optional): 分块大小. Defaults to None.
+        var_name (str, optional): 数据变量名. Defaults to "variable".
+        time_selection (Literal[&#39;Y&#39;,&#39;M&#39;,&#39;D&#39;,&#39;season&#39;], optional): 时间粒度. Defaults to 'Y'.
+    """
+    if time_dim not in ds.dims:
+        raise ValueError(f"维度{time_dim}不存在")
+    if 'ndarray' not in get_func_args(func).values():
+        raise ValueError("func必须包含numpy.ndarray参数")
+    ds = ds.chunk({
+        time_dim: -1,
+        **{
+            dim_name: chunks[dim_name] for dim_name in chunks if dim_name != time_dim
+        }
+    })
+    return ds[var_name].resample({
+        time_dim: time_selection
+    }).map(xr.apply_ufunc,kwargs={
+        "func":func,
+        "vectorize":True,
+        "input_core_dims":[[time_dim]],
+        "dask":"parallelized",
+        "output_dtypes":[float],
+        "kwargs":kwargs,
+    })
