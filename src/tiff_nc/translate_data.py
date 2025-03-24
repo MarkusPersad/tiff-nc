@@ -114,9 +114,9 @@ def tiffs_to_nc(
         date_str = os.path.basename(file).split('.')[0]
         try:
             date = pd.to_datetime(date_str,format=time_format)
-            del date_str
         except ValueError:
             raise ValueError(f"无法解析日期字符串：{date_str}")
+        del date_str
         xds = rxr.open_rasterio(file, chunks={
             "x": chunks["longitude"],
             "y": chunks["latitude"],

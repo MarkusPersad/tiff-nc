@@ -61,7 +61,7 @@ def calculate_by_time(
     kwargs:Mapping[str,Any]|None=None,
     chunks:dict[str,int]|None=None,
     var_name:str="variable",
-    time_selection:Literal['Y','M','D','S'] = 'year'
+    time_selection:Literal['Y', 'M', 'QS-DEC'] = 'Y'
     ):
     """
     按时间维度计算数据集的函数,可指定时间粒度
@@ -73,7 +73,7 @@ def calculate_by_time(
         kwargs (Mapping[str,Any] | None, optional): func的额外参数. Defaults to None.
         chunks (dict[str,int] | None, optional): 分块大小. Defaults to None.
         var_name (str, optional): 数据变量名. Defaults to "variable".
-        time_selection (Literal[&#39;Y&#39;,&#39;M&#39;,&#39;D&#39;,&#39;season&#39;], optional): 时间粒度. Defaults to 'Y'.
+        time_selection (Literal['Y', 'M', 'QS-DEC'], optional): 时间粒度. Defaults to 'Y'.
     """
     if time_dim not in ds.dims:
         raise ValueError(f"维度{time_dim}不存在")
