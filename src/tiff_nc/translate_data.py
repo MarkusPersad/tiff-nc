@@ -75,7 +75,6 @@ def nc_to_tiffs(
                     tags={"TIFFTAG_DATETIME": time.strftime(time_format)}
                 )
 
-
 def tiffs_to_nc(
     tiffs_dir:str,
     nc_file:str,
@@ -87,6 +86,7 @@ def tiffs_to_nc(
     workers:int=4,
     attrs:dict[str, str]={},
     vars_attrs:dict[str, dict[str, str]]={},
+    crs:str="EPSG:4326",
     ) -> None:
     """
     将多波段tiff文件转为nc文件
@@ -121,7 +121,8 @@ def tiffs_to_nc(
         xds = rxr.open_rasterio(file, chunks={
             "x": chunks["longitude"],
             "y": chunks["latitude"],
-        })
+        },cache=False)
+        xds = xds.astype(np.float32)
         xds = xds.assign_coords({time_dim: date})
         del date
         lds = xds.to_dataset(dim="band")
@@ -135,29 +136,30 @@ def tiffs_to_nc(
         del lds
     ds = xr.concat(xds_sets, dim=time_dim)
     ds = ds.rename({'y':'latitude', 'x':'longitude'})
-    ds = ds.where(ds[var_name] != nodata,other= np.nan)
+    ds = ds.where(ds[var_names] != nodata , np.nan)
     # 添加全局属性
     ds.attrs.update(attrs)
+    # 设置编码
+    ds.encoding = {}
     encoding = {
         **{
             var: {
                 "zlib": True,
                 "complevel": 4,
-                "dtype": "float32",
-                "_FillValue": np.nan,
                 "shuffle": True,
+                "_FillValue": np.nan,
                 "chunksizes":(
                                 chunks[time_dim] if chunks[time_dim] > 0 else 1,
                                 chunks['latitude'] if chunks['latitude'] > 0 else 1,
                                 chunks['longitude'] if chunks['longitude'] > 0 else 1),
                 **vars_attrs.get(var, {})# 添加变量属性
-            }for var in ds.data_vars
+            }for var in var_names
         },
         "latitude": {"dtype": "float32"},
         "longitude": {"dtype": "float32"},
         time_dim: {"dtype": "float64"},
     }
-    delayed = ds.to_netcdf(nc_file, engine="h5netcdf", compute=False, encoding=encoding)
     
+    delayed = ds.to_netcdf(nc_file, engine="h5netcdf", compute=False,encoding=encoding)
     with ProgressBar():
         delayed.compute(num_workers=workers)
