@@ -70,7 +70,7 @@ def nc_to_tiffs(
                 stacked.rio.to_raster(
                     output_path,
                     dtype="float32",
-                    nodata=np.nan,
+                    nodata = np.nan,
                     compress="LZW",
                     tags={"TIFFTAG_DATETIME": time.strftime(time_format)}
                 )
@@ -83,6 +83,7 @@ def tiffs_to_nc(
     time_dim:str="valid_time",
     chunks:Optional[dict[str, int]] = None,
     time_format:Literal['%Y%m%d','%Y%m','%Y']="%Y%m%d",
+    nodata = -9999.0,
     workers:int=4,
     attrs:dict[str, str]={},
     vars_attrs:dict[str, dict[str, str]]={},
@@ -134,6 +135,7 @@ def tiffs_to_nc(
         del lds
     ds = xr.concat(xds_sets, dim=time_dim)
     ds = ds.rename({'y':'latitude', 'x':'longitude'})
+    ds = ds.where(ds[var_name] != nodata,other= np.nan)
     # 添加全局属性
     ds.attrs.update(attrs)
     encoding = {
@@ -143,6 +145,7 @@ def tiffs_to_nc(
                 "complevel": 4,
                 "dtype": "float32",
                 "_FillValue": np.nan,
+                "shuffle": True,
                 "chunksizes":(
                                 chunks[time_dim] if chunks[time_dim] > 0 else 1,
                                 chunks['latitude'] if chunks['latitude'] > 0 else 1,
