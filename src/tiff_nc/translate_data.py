@@ -38,7 +38,7 @@ def nc_to_tiffs(
         var_names = [var_name]
     else:
         var_names = var_name
-    print(var_names)
+    # print(var_names)
     out_dir = os.path.join(tiffs_dir, os.path.splitext(os.path.basename(nc_file))[0])
     os.makedirs(out_dir, exist_ok=True)
     
@@ -105,7 +105,8 @@ def tiffs_to_nc(
     Raises:
         ValueError: 文件名称为时间字符串格式与Time_format不匹配。
     """
-    files = glob.glob(f"{tiffs_dir}/*.tif")
+    # files = glob.glob(f"{tiffs_dir}/*.tif")
+    files = glob.glob(os.path.join(tiffs_dir,"**","*.tif"),recursive=True)
     xds_sets:list[xr.Dataset] = []
     if isinstance(var_name, str):
         var_names = [var_name]
